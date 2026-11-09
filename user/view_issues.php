@@ -1,7 +1,7 @@
 
 <?php
 session_start();
-include 'db.php';
+include '../db.php';
 
 $sql = "SELECT * FROM issues ORDER BY created_at DESC";
 $result = $conn->query($sql);
@@ -28,7 +28,7 @@ function escape($value) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="src/view.png">
+<link rel="icon" href="../src/view.png">
 <title>Reported Issues | Kampung Sentosa</title>
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -574,7 +574,7 @@ footer span {
                     </li>
 
                     <li class="nav-item">
-                        <a href="logout.php" class="nav-link"
+                        <a href="../logout.php" class="nav-link"
                            style="color:#e77777 !important;">
                             Logout
                         </a>
@@ -753,9 +753,9 @@ footer span {
 
                         <td>
                             <?php if (!empty($row['photo'])): ?>
-                                <a href="<?php echo escape($row['photo']); ?>"
+                                <a href="../<?php echo escape($row['photo']); ?>"
                                    target="_blank" rel="noopener noreferrer">
-                                    <img src="<?php echo escape($row['photo']); ?>"
+                                    <img src="../<?php echo escape($row['photo']); ?>"
                                          class="issue-image"
                                          alt="Reported issue photo">
                                 </a>

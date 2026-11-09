@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php';
+include '../config.php';
 
 if (isset($_SESSION['username'])) {
     header('Location: index1.php');
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resident Registration | Kampung Sentosa</title>
-<link rel="icon" href="src/adminicon.png">
+<link rel="icon" href="../src/adminicon.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
@@ -93,7 +93,7 @@ a{color:inherit}
 .back-top{color:#e6ded3;text-decoration:none;font-size:12px}.back-top:hover{color:#d4b58c}
 main{flex:1;padding:56px 20px 75px;background:radial-gradient(circle at 20% 15%,#f3e8d9 0,transparent 36%),var(--cream)}
 .register-wrap{max-width:930px;margin:auto;display:grid;grid-template-columns:.85fr 1.15fr;border:1px solid var(--border);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 14px 45px rgba(67,48,28,.08)}
-.intro-side{background:linear-gradient(160deg,rgba(33,39,42,.83),rgba(33,39,42,.92)),url('src/kampung.jpeg') center/cover;min-height:580px;padding:49px 35px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+.intro-side{background:linear-gradient(160deg,rgba(33,39,42,.83),rgba(33,39,42,.92)),url('../src/kampung.jpeg') center/cover;min-height:580px;padding:49px 35px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
 .script{font:normal 48px/1.15 'Great Vibes',cursive;color:#d4b58c;margin:0 0 16px}
 .intro-side h1{font-size:29px;line-height:1.25;margin:0 0 15px}
 .intro-side p{font-size:13px;line-height:1.9;color:#e4ded8;margin:0}
@@ -119,8 +119,8 @@ footer{background:var(--dark);color:#d9d2ca;text-align:center;padding:21px;font-
 </head>
 <body>
 <header class="site-header"><div class="header-inner">
-  <a href="register1.php" class="brand">Issues <span>Tracker</span></a>
-  <a href="register1.php" class="back-top"><i class="fa-solid fa-arrow-left"></i> Back to account selection</a>
+  <a href="../register1.php" class="brand">Issues <span>Tracker</span></a>
+  <a href="../register1.php" class="back-top"><i class="fa-solid fa-arrow-left"></i> Back to account selection</a>
 </div></header>
 <main>
   <div class="register-wrap">
@@ -140,7 +140,7 @@ footer{background:var(--dark);color:#d9d2ca;text-align:center;padding:21px;font-
         <div class="form-group"><label for="cpassword"><i class="fa-solid fa-shield-halved"></i> Confirm Password</label><div class="input-wrap"><input class="field password-field" id="cpassword" type="password" name="cpassword" autocomplete="new-password" placeholder="Re-enter your password" minlength="8" required><button class="toggle-pw" type="button" aria-label="Show confirmation password" aria-pressed="false" data-target="cpassword"><i class="fa-regular fa-eye"></i></button></div></div>
         <button type="submit" name="submit" value="1" class="btn btn-submit"><i class="fa-solid fa-user-plus"></i> Create Account</button>
       </form>
-      <div class="secondary-links"><span>Already have an account? <a href="index1.php">Log In</a></span><a href="register1.php"><i class="fa-solid fa-arrow-left"></i> Back</a></div>
+      <div class="secondary-links"><span>Already have an account? <a href="index1.php">Log In</a></span><a href="../register1.php"><i class="fa-solid fa-arrow-left"></i> Back</a></div>
     </section>
   </div>
 </main>

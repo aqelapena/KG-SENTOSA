@@ -1,56 +1,50 @@
 
 <?php
 session_start();
-include 'config.php';
+include '../config.php';
 
 /*
- SECURITY:
- Add your existing admin-session authentication check here.
- For example, ONLY if your loginadmin.php stores admin_id:
-
+ IMPORTANT:
+ Protect this page using your existing admin login session.
+ Replace the check below with your actual admin session variable.
+ Example:
  if (!isset($_SESSION['admin_id'])) {
-     header("Location: loginadmin.php");
+     header('Location: loginadmin.php');
      exit;
  }
-
- Do not deploy Edit/Delete without this check.
 */
 
-if (empty($_SESSION['user_management_csrf'])) {
-    $_SESSION['user_management_csrf'] =
-        bin2hex(random_bytes(32));
+if (empty($_SESSION['admin_csrf'])) {
+    $_SESSION['admin_csrf'] = bin2hex(random_bytes(32));
 }
 
-function escape($value) {
-    return htmlspecialchars(
-        (string)$value,
-        ENT_QUOTES,
-        'UTF-8'
-    );
+$message = '';
+$messageType = 'success';
+
+if (isset($_SESSION['admin_flash'])) {
+    $message = $_SESSION['admin_flash']['message'];
+    $messageType = $_SESSION['admin_flash']['type'];
+    unset($_SESSION['admin_flash']);
 }
 
-function flashRedirect($message, $type = 'success') {
-    $_SESSION['user_management_flash'] = [
+function redirectWithMessage($message, $type = 'success') {
+    $_SESSION['admin_flash'] = [
         'message' => $message,
         'type' => $type
     ];
-
-    header("Location: userview.php");
+    header('Location: adminview.php');
     exit;
 }
 
-// EDIT AND DELETE FUNCTIONS
+// HANDLE EDIT AND DELETE
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (
         !isset($_POST['csrf_token']) ||
-        !hash_equals(
-            $_SESSION['user_management_csrf'],
-            $_POST['csrf_token']
-        )
+        !hash_equals($_SESSION['admin_csrf'], $_POST['csrf_token'])
     ) {
         http_response_code(403);
-        exit("Invalid security token.");
+        exit('Invalid security token.');
     }
 
     $action = $_POST['action'] ?? '';
@@ -60,60 +54,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     if (!$id || $id < 1) {
-        flashRedirect("Invalid user ID.", "error");
+        redirectWithMessage('Invalid admin ID.', 'error');
     }
 
-    // UPDATE USER
     if ($action === 'edit') {
 
         $username = trim($_POST['username'] ?? '');
         $email = trim($_POST['email'] ?? '');
 
         if ($username === '' || $email === '') {
-            flashRedirect(
-                "Username and email cannot be empty.",
-                "error"
+            redirectWithMessage(
+                'Username and email are required.',
+                'error'
             );
         }
 
         if (strlen($username) > 100 ||
             strlen($email) > 254) {
-            flashRedirect(
-                "Username or email is too long.",
-                "error"
+            redirectWithMessage(
+                'Username or email is too long.',
+                'error'
             );
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            flashRedirect(
-                "Please enter a valid email.",
-                "error"
+            redirectWithMessage(
+                'Please enter a valid email address.',
+                'error'
             );
         }
 
-        // Duplicate email check
+        // Check existing email
         $check = $conn->prepare(
-            "SELECT id FROM users
+            "SELECT id FROM myadmin
              WHERE email = ? AND id != ?"
         );
-
         $check->bind_param("si", $email, $id);
         $check->execute();
         $check->store_result();
 
         if ($check->num_rows > 0) {
             $check->close();
-
-            flashRedirect(
-                "Email is already used by another user.",
-                "error"
+            redirectWithMessage(
+                'Email already belongs to another admin.',
+                'error'
             );
         }
-
         $check->close();
 
+        // Update admin information
         $stmt = $conn->prepare(
-            "UPDATE users
+            "UPDATE myadmin
              SET username = ?, email = ?
              WHERE id = ?"
         );
@@ -126,66 +117,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
 
         if ($stmt->execute()) {
-            $stmt->close();
-
-            flashRedirect(
-                "User information updated successfully."
+            redirectWithMessage(
+                'Admin information updated successfully.'
             );
         } else {
-            flashRedirect(
-                "Failed to update user.",
-                "error"
+            redirectWithMessage(
+                'Unable to update admin information.',
+                'error'
             );
         }
-    }
 
-    // DELETE USER
-    elseif ($action === 'delete') {
+    } elseif ($action === 'delete') {
+
+        // Keep at least one administrator
+        $countResult = $conn->query(
+            "SELECT COUNT(*) AS total FROM myadmin"
+        );
+        $total = (int) $countResult
+            ->fetch_assoc()['total'];
+
+        if ($total <= 1) {
+            redirectWithMessage(
+                'Cannot delete the last administrator.',
+                'error'
+            );
+        }
 
         $stmt = $conn->prepare(
-            "DELETE FROM users WHERE id = ?"
+            "DELETE FROM myadmin WHERE id = ?"
         );
-
         $stmt->bind_param("i", $id);
 
         if ($stmt->execute() && $stmt->affected_rows > 0) {
-            $stmt->close();
-
-            flashRedirect(
-                "User deleted successfully."
+            redirectWithMessage(
+                'Admin deleted successfully.'
             );
         } else {
-            flashRedirect(
-                "Failed to delete user.",
-                "error"
+            redirectWithMessage(
+                'Unable to delete admin.',
+                'error'
             );
         }
-    }
 
-    else {
-        flashRedirect("Invalid action.", "error");
+    } else {
+        redirectWithMessage('Invalid action.', 'error');
     }
 }
 
-// FETCH USER DATA
-$result = $conn->query(
-    "SELECT id, username, email
-     FROM users ORDER BY id ASC"
-);
+// FETCH ADMIN RECORDS
+$sql = "SELECT id, username, email
+        FROM myadmin ORDER BY id ASC";
 
-$users = [];
+$result = $conn->query($sql);
+
+$admins = [];
 
 if ($result) {
     while ($row = $result->fetch_assoc()) {
-        $users[] = $row;
+        $admins[] = $row;
     }
 }
 
-$totalUsers = count($users);
+$totalAdmins = count($admins);
 
-// FLASH MESSAGE
-$flash = $_SESSION['user_management_flash'] ?? null;
-unset($_SESSION['user_management_flash']);
+function e($value) {
+    return htmlspecialchars(
+        (string)$value,
+        ENT_QUOTES,
+        'UTF-8'
+    );
+}
 ?>
 
 <!DOCTYPE html>
@@ -193,13 +194,12 @@ unset($_SESSION['user_management_flash']);
 
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+      content="width=device-width, initial-scale=1.0">
 
-<title>User Management</title>
+<title>Admin Management</title>
 
-<link rel="icon" href="src/dadmin.png">
+<link rel="icon" href="../src/dadmin.png">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -211,34 +211,34 @@ rel="stylesheet">
 :root {
     --navy: #17213b;
     --purple: #7161ef;
-    --purple-light: #f0edff;
-    --background: #f6f7fc;
+    --light-purple: #f0edff;
+    --bg: #f6f7fc;
     --text: #252b40;
     --muted: #8992a7;
     --border: #edf0f6;
 }
 
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
     font-family: 'Inter', sans-serif;
-    background: var(--background);
+    background: var(--bg);
     color: var(--text);
 }
 
-/* NAVBAR */
+/* HEADER */
 .navbar {
     height: 78px;
-    padding: 0 7%;
     background: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 7%;
 }
 
 .logo {
@@ -255,19 +255,19 @@ body {
     height: 42px;
     background: var(--purple);
     color: white;
-    border-radius: 12px;
     display: grid;
     place-items: center;
+    border-radius: 12px;
 }
 
 .back-btn {
-    background: var(--purple-light);
+    background: #f0edff;
     color: var(--purple);
-    text-decoration: none;
     padding: 11px 19px;
     border-radius: 10px;
     font-size: 13px;
     font-weight: 700;
+    text-decoration: none;
     display: flex;
     align-items: center;
     gap: 9px;
@@ -275,7 +275,7 @@ body {
 }
 
 .back-btn:hover {
-    background: #ded8ff;
+    background: #e1dbff;
 }
 
 /* CONTENT */
@@ -297,29 +297,29 @@ body {
 }
 
 .page-heading p {
-    color: var(--muted);
     font-size: 13px;
+    color: var(--muted);
     line-height: 1.7;
 }
 
-/* SUMMARY CARD */
+/* SUMMARY */
 .summary-card {
     background: white;
-    padding: 25px;
-    border-radius: 18px;
     border: 1px solid var(--border);
-    box-shadow: 0 5px 20px #20263a06;
+    border-radius: 18px;
+    padding: 25px;
     display: flex;
     align-items: center;
     gap: 20px;
     margin-bottom: 27px;
+    box-shadow: 0 5px 20px #20263a06;
 }
 
 .summary-icon {
     width: 60px;
     height: 60px;
     border-radius: 16px;
-    background: var(--purple-light);
+    background: var(--light-purple);
     color: var(--purple);
     display: grid;
     place-items: center;
@@ -335,7 +335,6 @@ body {
 .summary-card h2 {
     font-size: 29px;
     font-weight: 800;
-    color: var(--navy);
 }
 
 /* TABLE CARD */
@@ -363,11 +362,10 @@ body {
 }
 
 .table-title p {
-    color: var(--muted);
     font-size: 12px;
+    color: var(--muted);
 }
 
-/* SEARCH */
 .search-box {
     position: relative;
 }
@@ -381,12 +379,12 @@ body {
 }
 
 .search-box input {
-    width: 280px;
-    padding: 13px 15px 13px 42px;
     border: 1px solid #e5e8f0;
-    border-radius: 10px;
     outline: none;
     background: #fafbfe;
+    border-radius: 10px;
+    width: 280px;
+    padding: 13px 15px 13px 42px;
     font-family: inherit;
     font-size: 12px;
     transition: .2s;
@@ -415,8 +413,8 @@ thead {
 th {
     padding: 18px;
     font-size: 12px;
-    font-weight: 700;
     color: #657087;
+    font-weight: 700;
     white-space: nowrap;
 }
 
@@ -452,11 +450,11 @@ tbody tr:last-child td {
 .user-avatar {
     width: 35px;
     height: 35px;
-    border-radius: 10px;
-    background: #e9f3ff;
-    color: #448de2;
+    background: #eeeaff;
+    color: var(--purple);
     display: grid;
     place-items: center;
+    border-radius: 10px;
     font-weight: 700;
     flex-shrink: 0;
 }
@@ -469,20 +467,21 @@ tbody tr:last-child td {
     color: #737d91;
 }
 
-/* ACTION BUTTONS */
 .actions {
     display: flex;
+    align-items: center;
     gap: 9px;
 }
 
+/* ACTION BUTTONS */
 .btn {
     border: none;
     cursor: pointer;
-    padding: 10px 14px;
     border-radius: 9px;
-    font-family: inherit;
+    padding: 10px 14px;
     font-size: 12px;
     font-weight: 700;
+    font-family: inherit;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -517,21 +516,21 @@ tbody tr:last-child td {
 }
 
 .alert-success {
-    background: #e7f8ef;
     color: #147c54;
+    background: #e7f8ef;
 }
 
 .alert-error {
-    background: #fff0f2;
     color: #b5324c;
+    background: #fff0f2;
 }
 
 /* MODAL */
 .modal {
-    display: none;
     position: fixed;
     inset: 0;
     background: rgba(17, 24, 39, .55);
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 999;
@@ -544,10 +543,10 @@ tbody tr:last-child td {
 
 .modal-content {
     background: white;
+    border-radius: 20px;
+    padding: 30px;
     width: 100%;
     max-width: 460px;
-    padding: 30px;
-    border-radius: 20px;
     box-shadow: 0 20px 60px #0002;
 }
 
@@ -564,17 +563,16 @@ tbody tr:last-child td {
 }
 
 .close-btn {
-    width: 33px;
-    height: 33px;
     border: none;
-    border-radius: 9px;
     background: #f3f4f8;
     color: #677088;
+    width: 33px;
+    height: 33px;
+    border-radius: 9px;
     cursor: pointer;
     font-size: 17px;
 }
 
-/* FORM */
 .form-group {
     margin-bottom: 20px;
 }
@@ -589,12 +587,12 @@ tbody tr:last-child td {
 .form-group input {
     width: 100%;
     padding: 14px;
+    background: #fafbfe;
     border: 1px solid #e5e8f0;
     border-radius: 10px;
-    background: #fafbfe;
     outline: none;
-    font-size: 13px;
     font-family: inherit;
+    font-size: 13px;
 }
 
 .form-group input:focus {
@@ -622,11 +620,6 @@ tbody tr:last-child td {
     background: #5b49d8;
 }
 
-/* DELETE CONFIRMATION */
-.delete-content {
-    text-align: center;
-}
-
 .delete-icon {
     width: 65px;
     height: 65px;
@@ -639,14 +632,18 @@ tbody tr:last-child td {
     font-size: 26px;
 }
 
+.delete-content {
+    text-align: center;
+}
+
 .delete-content h2 {
     font-size: 20px;
     margin-bottom: 12px;
 }
 
 .delete-content p {
-    color: var(--muted);
     font-size: 13px;
+    color: var(--muted);
     line-height: 1.8;
 }
 
@@ -659,35 +656,17 @@ tbody tr:last-child td {
     background: #c83d54;
 }
 
-/* EMPTY MESSAGE */
 .empty-message {
     text-align: center;
+    padding: 35px;
     color: var(--muted);
     font-size: 13px;
-    padding: 35px;
-}
-
-/* FOOTER */
-.footer {
-    padding: 30px;
-    text-align: center;
-    color: #a1a8b8;
-    font-size: 11px;
 }
 
 /* RESPONSIVE */
 @media(max-width: 700px) {
     .navbar {
         padding: 0 20px;
-    }
-
-    .logo {
-        font-size: 15px;
-    }
-
-    .back-btn {
-        font-size: 11px;
-        padding: 10px;
     }
 
     .container {
@@ -708,6 +687,10 @@ tbody tr:last-child td {
         width: 100%;
     }
 
+    .table-header {
+        align-items: stretch;
+    }
+
     table {
         min-width: 750px;
     }
@@ -717,7 +700,6 @@ tbody tr:last-child td {
     }
 }
 </style>
-
 </head>
 
 <body>
@@ -727,9 +709,9 @@ tbody tr:last-child td {
 
     <div class="logo">
         <div class="logo-icon">
-            <i class="fa-solid fa-users"></i>
+            <i class="fa-solid fa-user-shield"></i>
         </div>
-        User Management
+        Admin Management
     </div>
 
     <a href="adminhome.php" class="back-btn">
@@ -739,59 +721,56 @@ tbody tr:last-child td {
 
 </nav>
 
-<!-- MAIN CONTENT -->
 <div class="container">
 
+    <!-- PAGE HEADING -->
     <div class="page-heading">
-        <h1>User Management</h1>
+        <h1>Admin Management</h1>
         <p>
-            View, edit and manage registered
-            user accounts in your system.
+            View, edit and manage administrator
+            accounts in your system.
         </p>
     </div>
 
-    <!-- SUCCESS / ERROR MESSAGE -->
-    <?php if ($flash): ?>
-        <div class="alert <?= $flash['type'] === 'error' ? 'alert-error' : 'alert-success' ?>">
+    <!-- ALERT MESSAGE -->
+    <?php if ($message !== ''): ?>
+        <div class="alert <?= $messageType === 'error' ? 'alert-error' : 'alert-success' ?>">
             <i class="fa-solid fa-circle-info"></i>
-            <?= escape($flash['message']) ?>
+            <?= e($message) ?>
         </div>
     <?php endif; ?>
 
-    <!-- USER COUNT -->
+    <!-- TOTAL ADMIN CARD -->
     <div class="summary-card">
-
         <div class="summary-icon">
-            <i class="fa-solid fa-users"></i>
+            <i class="fa-solid fa-users-gear"></i>
         </div>
 
         <div>
-            <p>Total Registered Users</p>
-            <h2><?= $totalUsers ?></h2>
+            <p>Total Administrators</p>
+            <h2><?= $totalAdmins ?></h2>
         </div>
-
     </div>
 
-    <!-- USER RECORDS -->
+    <!-- ADMIN RECORDS -->
     <div class="table-card">
 
         <div class="table-header">
 
             <div class="table-title">
-                <h2>Registered User Records</h2>
+                <h2>Administrator Records</h2>
                 <p>
-                    Manage user accounts and information
+                    Manage registered administrator accounts
                 </p>
             </div>
 
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
-
                 <input
                     type="text"
                     id="searchInput"
                     placeholder="Search username or email..."
-                    oninput="searchUsers()"
+                    oninput="searchAdmins()"
                 >
             </div>
 
@@ -799,11 +778,11 @@ tbody tr:last-child td {
 
         <div class="table-responsive">
 
-            <table id="userTable">
+            <table id="adminTable">
 
                 <thead>
                     <tr>
-                        <th>USER ID</th>
+                        <th>ADMIN ID</th>
                         <th>USERNAME</th>
                         <th>EMAIL ADDRESS</th>
                         <th>ACTIONS</th>
@@ -812,37 +791,35 @@ tbody tr:last-child td {
 
                 <tbody>
 
-                <?php if ($totalUsers > 0): ?>
+                <?php if ($totalAdmins > 0): ?>
 
-                    <?php foreach ($users as $user): ?>
+                    <?php foreach ($admins as $admin): ?>
 
-                    <tr class="user-row">
+                    <tr class="admin-row">
 
                         <td>
                             <span class="id-badge">
-                                #<?= (int)$user['id'] ?>
+                                #<?= (int)$admin['id'] ?>
                             </span>
                         </td>
 
                         <td>
                             <div class="user-cell">
-
                                 <div class="user-avatar">
-                                    <?= escape(strtoupper(
-                                        substr($user['username'], 0, 1)
+                                    <?= e(strtoupper(
+                                        substr($admin['username'], 0, 1)
                                     )) ?>
                                 </div>
 
                                 <span class="username">
-                                    <?= escape($user['username']) ?>
+                                    <?= e($admin['username']) ?>
                                 </span>
-
                             </div>
                         </td>
 
                         <td>
                             <span class="email">
-                                <?= escape($user['email']) ?>
+                                <?= e($admin['email']) ?>
                             </span>
                         </td>
 
@@ -852,9 +829,9 @@ tbody tr:last-child td {
                                 <button
                                     type="button"
                                     class="btn btn-edit"
-                                    data-id="<?= (int)$user['id'] ?>"
-                                    data-username="<?= escape($user['username']) ?>"
-                                    data-email="<?= escape($user['email']) ?>"
+                                    data-id="<?= (int)$admin['id'] ?>"
+                                    data-username="<?= e($admin['username']) ?>"
+                                    data-email="<?= e($admin['email']) ?>"
                                     onclick="openEdit(this)"
                                 >
                                     <i class="fa-solid fa-pen"></i>
@@ -864,8 +841,8 @@ tbody tr:last-child td {
                                 <button
                                     type="button"
                                     class="btn btn-delete"
-                                    data-id="<?= (int)$user['id'] ?>"
-                                    data-username="<?= escape($user['username']) ?>"
+                                    data-id="<?= (int)$admin['id'] ?>"
+                                    data-username="<?= e($admin['username']) ?>"
                                     onclick="openDelete(this)"
                                 >
                                     <i class="fa-solid fa-trash"></i>
@@ -883,7 +860,7 @@ tbody tr:last-child td {
 
                     <tr>
                         <td colspan="4" class="empty-message">
-                            No user records found.
+                            No administrator records found.
                         </td>
                     </tr>
 
@@ -898,7 +875,7 @@ tbody tr:last-child td {
                 class="empty-message"
                 style="display:none"
             >
-                No matching users found.
+                No matching administrators found.
             </div>
 
         </div>
@@ -907,14 +884,13 @@ tbody tr:last-child td {
 
 </div>
 
-<!-- EDIT USER MODAL -->
+<!-- EDIT MODAL -->
 <div class="modal" id="editModal">
 
     <div class="modal-content">
 
         <div class="modal-heading">
-            <h2>Edit User Information</h2>
-
+            <h2>Edit Administrator</h2>
             <button
                 type="button"
                 class="close-btn"
@@ -924,29 +900,22 @@ tbody tr:last-child td {
             </button>
         </div>
 
-        <form method="POST" action="userview.php">
+        <form method="POST" action="adminview.php">
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="<?= escape($_SESSION['user_management_csrf']) ?>"
-            >
+            <input type="hidden"
+                   name="csrf_token"
+                   value="<?= e($_SESSION['admin_csrf']) ?>">
 
-            <input
-                type="hidden"
-                name="action"
-                value="edit"
-            >
+            <input type="hidden"
+                   name="action"
+                   value="edit">
 
-            <input
-                type="hidden"
-                name="id"
-                id="editId"
-            >
+            <input type="hidden"
+                   name="id"
+                   id="editId">
 
             <div class="form-group">
                 <label>Username</label>
-
                 <input
                     type="text"
                     name="username"
@@ -958,7 +927,6 @@ tbody tr:last-child td {
 
             <div class="form-group">
                 <label>Email Address</label>
-
                 <input
                     type="email"
                     name="email"
@@ -991,10 +959,9 @@ tbody tr:last-child td {
         </form>
 
     </div>
-
 </div>
 
-<!-- DELETE CONFIRMATION MODAL -->
+<!-- DELETE MODAL -->
 <div class="modal" id="deleteModal">
 
     <div class="modal-content delete-content">
@@ -1003,7 +970,7 @@ tbody tr:last-child td {
             <i class="fa-solid fa-trash-can"></i>
         </div>
 
-        <h2>Delete User?</h2>
+        <h2>Delete Administrator?</h2>
 
         <p>
             Are you sure you want to delete
@@ -1012,25 +979,19 @@ tbody tr:last-child td {
             This action cannot be undone.
         </p>
 
-        <form method="POST" action="userview.php">
+        <form method="POST" action="adminview.php">
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="<?= escape($_SESSION['user_management_csrf']) ?>"
-            >
+            <input type="hidden"
+                   name="csrf_token"
+                   value="<?= e($_SESSION['admin_csrf']) ?>">
 
-            <input
-                type="hidden"
-                name="action"
-                value="delete"
-            >
+            <input type="hidden"
+                   name="action"
+                   value="delete">
 
-            <input
-                type="hidden"
-                name="id"
-                id="deleteId"
-            >
+            <input type="hidden"
+                   name="id"
+                   id="deleteId">
 
             <div class="modal-actions"
                  style="justify-content:center">
@@ -1056,19 +1017,11 @@ tbody tr:last-child td {
         </form>
 
     </div>
-
-</div>
-
-<div class="footer">
-    &copy; <?= date('Y') ?>
-    User Management System. All rights reserved.
 </div>
 
 <script>
-
 // OPEN EDIT MODAL
 function openEdit(button) {
-
     document.getElementById('editId').value =
         button.dataset.id;
 
@@ -1084,12 +1037,11 @@ function openEdit(button) {
 
 // OPEN DELETE MODAL
 function openDelete(button) {
-
     document.getElementById('deleteId').value =
         button.dataset.id;
 
-    document.getElementById('deleteUsername')
-        .textContent = button.dataset.username;
+    document.getElementById('deleteUsername').textContent =
+        button.dataset.username;
 
     document.getElementById('deleteModal')
         .classList.add('show');
@@ -1097,7 +1049,6 @@ function openDelete(button) {
 
 // CLOSE MODALS
 function closeModals() {
-
     document.getElementById('editModal')
         .classList.remove('show');
 
@@ -1105,43 +1056,33 @@ function closeModals() {
         .classList.remove('show');
 }
 
-// CLICK OUTSIDE MODAL
+// CLOSE WHEN CLICKING OUTSIDE
 window.addEventListener('click', function(event) {
-
     if (event.target.classList.contains('modal')) {
         closeModals();
     }
-
 });
 
-// ESCAPE KEY
+// CLOSE WITH ESCAPE
 document.addEventListener('keydown', function(event) {
-
     if (event.key === 'Escape') {
         closeModals();
     }
-
 });
 
-// SEARCH USERS
-function searchUsers() {
-
-    const input = document
-        .getElementById('searchInput')
+// SEARCH ADMINS
+function searchAdmins() {
+    const input = document.getElementById('searchInput')
         .value.toLowerCase().trim();
 
-    const rows = document.querySelectorAll('.user-row');
-
+    const rows = document.querySelectorAll('.admin-row');
     let visible = 0;
 
     rows.forEach(function(row) {
-
-        const username = row
-            .querySelector('.username')
+        const username = row.querySelector('.username')
             .textContent.toLowerCase();
 
-        const email = row
-            .querySelector('.email')
+        const email = row.querySelector('.email')
             .textContent.toLowerCase();
 
         const match =
@@ -1153,7 +1094,6 @@ function searchUsers() {
         if (match) {
             visible++;
         }
-
     });
 
     document.getElementById('noSearchResults')
@@ -1162,7 +1102,6 @@ function searchUsers() {
                 ? 'block'
                 : 'none';
 }
-
 </script>
 
 </body>

@@ -3,7 +3,7 @@
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header("Location: index.php");
+    header("Location: ../index.php");
 }
 
 ?>
@@ -19,22 +19,22 @@ if (!isset($_SESSION['username'])) {
         rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/animate.css">
-    <link rel="stylesheet" href="css/owl.carousel.min.css">
-    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="../css/animate.css">
+    <link rel="stylesheet" href="../css/owl.carousel.min.css">
+    <link rel="stylesheet" href="../css/owl.theme.default.min.css">
 
-    <link rel="stylesheet" href="css/aos.css">
+    <link rel="stylesheet" href="../css/aos.css">
 
     <link rel="stylesheet" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
 
-    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
-    <link rel="stylesheet" href="css/jquery.timepicker.css">
+    <link rel="stylesheet" href="../css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="../css/jquery.timepicker.css">
 
 
-    <link rel="stylesheet" href="css/flaticon.css">
-    <link rel="stylesheet" href="css/icomoon.css">
-    <link rel="stylesheet" href="style.css">
-	<link rel="icon" href="src/icon.png" />
+    <link rel="stylesheet" href="../css/flaticon.css">
+    <link rel="stylesheet" href="../css/icomoon.css">
+    <link rel="stylesheet" href="../css/style.css">
+	<link rel="icon" href="../src/icon.png" />
     <title>User Home</title>
 </head>
 
@@ -56,7 +56,7 @@ if (!isset($_SESSION['username'])) {
                         <span class="nav-link text-white">Welcome, <?php echo $_SESSION['username']; ?></span>
                     </li>
                     <li class="nav-item">
-                    <a href="logout.php" class="nav-link active" style="color: #d51b0f;">Logout</a>
+                    <a href="../logout.php" class="nav-link active" style="color: #d51b0f;">Logout</a>
 
                     </li>
                 <?php endif; ?>
@@ -67,7 +67,7 @@ if (!isset($_SESSION['username'])) {
 
 
     <section class="home-slider owl-carousel js-fullheight">
-        <div class="slider-item js-fullheight" style="background-image: url(src/kampung.jpeg);">
+        <div class="slider-item js-fullheight" style="background-image: url(../src/kampung.jpeg);">
             <div class="overlay"></div>
             <div class="container">
                 <div class="row slider-text js-fullheight justify-content-center align-items-center"
@@ -104,7 +104,7 @@ if (!isset($_SESSION['username'])) {
                         </div>
                         <div class="row">
                             <div class="col-xl-4 col-md-6 intro_col">
-                                <div class="intro_image"><img src="src/gambar.jpg" alt="intro"></div>
+                                <div class="intro_image"><img src="../src/gambar.jpg" alt="intro"></div>
                             </div>
                      
                         </div>
@@ -191,19 +191,19 @@ if (!isset($_SESSION['username'])) {
 
 	
 	    <!-- scripts -->
-    <script src="js/jquery.min.js"></script>
-    <script src="js/jquery-migrate-3.0.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/jquery.waypoints.min.js"></script>
-    <script src="js/jquery.stellar.min.js"></script>
-    <script src="js/owl.carousel.min.js"></script>
-    <script src="js/jquery.magnific-popup.min.js"></script>
-    <script src="js/aos.js"></script>
-    <script src="js/jquery.animateNumber.min.js"></script>
-    <script src="js/bootstrap-datepicker.js"></script>
-    <script src="js/jquery.timepicker.min.js"></script>
-    <script src="js/scrollax.min.js"></script>
-    <script src="main.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery-migrate-3.0.1.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/jquery.waypoints.min.js"></script>
+    <script src="../js/jquery.stellar.min.js"></script>
+    <script src="../js/owl.carousel.min.js"></script>
+    <script src="../js/jquery.magnific-popup.min.js"></script>
+    <script src="../js/aos.js"></script>
+    <script src="../js/jquery.animateNumber.min.js"></script>
+    <script src="../js/bootstrap-datepicker.js"></script>
+    <script src="../js/jquery.timepicker.min.js"></script>
+    <script src="../js/scrollax.min.js"></script>
+    <script src="../js/main.js"></script>
 </body>
 
 </html>

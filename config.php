@@ -2,8 +2,8 @@
 
 $server = "localhost";
 $user = "root";
-$pass = "root";
-$database = "login_register";
+$pass = ""; // Leave this completely empty
+$database = "kg_sentosa";
 
 $conn = mysqli_connect($server, $user, $pass, $database);
 

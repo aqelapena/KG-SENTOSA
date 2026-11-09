@@ -4,11 +4,11 @@ session_start();
 
 // Existing session check
 if (!isset($_SESSION['username'])) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
-include 'db.php';
+include '../db.php';
 
 function e($value) {
     return htmlspecialchars(
@@ -72,7 +72,7 @@ function safePhoto($path) {
         return '';
     }
 
-    return $path;
+    return '../' . $path;
 }
 ?>
 
@@ -86,7 +86,7 @@ content="width=device-width, initial-scale=1.0">
 
 <title>Reported Issues Management</title>
 
-<link rel="icon" href="src/dadmin.png">
+<link rel="icon" href="../src/dadmin.png">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -1013,7 +1013,7 @@ function safeImagePath(value) {
         return '';
     }
 
-    return path;
+    return '../' + path;
 }
 
 // OPEN DETAILS

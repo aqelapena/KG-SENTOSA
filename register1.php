@@ -76,7 +76,7 @@
           <div class="role-icon" aria-hidden="true"><i class="fa-solid fa-people-group"></i></div>
           <h3>Resident</h3>
           <p>Register an account to report neighbourhood issues and keep your community informed.</p>
-          <a class="role-link" href="register.php">Register as Resident <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+          <a class="role-link" href="user/register.php">Register as Resident <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </article>
       </div>
       <div class="col-md-6">
@@ -84,7 +84,7 @@
           <div class="role-icon" aria-hidden="true"><i class="fa-solid fa-user-shield"></i></div>
           <h3>Committee Admin</h3>
           <p>Already an authorised committee member? Sign in to manage and review community reports.</p>
-          <a class="role-link secondary" href="loginadmin.php">Admin Login <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+          <a class="role-link secondary" href="admin/loginadmin.php">Admin Login <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </article>
       </div>
     </div>

@@ -1,0 +1,11 @@
+# macOS system files
+.DS_Store
+
+# IDE & Editor files
+.vscode/
+.idea/
+
+# Runtime uploaded photos (keep folder tracked via .gitkeep)
+uploads/*
+!uploads/.gitkeep
+
