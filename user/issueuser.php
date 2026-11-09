@@ -1,10 +1,10 @@
 <?php
 session_start();
 if (!isset($_SESSION['username'])) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit;
 }
-require 'db.php';
+require '../db.php';
 
 function e($value) {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!isset($allowed[$mime]) || @getimagesize($photo['tmp_name']) === false) {
                     $error_message = 'Upload a valid JPG, PNG or WEBP image.';
                 } else {
-                    $uploadDir = __DIR__ . '/uploads';
+                    $uploadDir = dirname(__DIR__) . '/uploads';
                     if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
                         $error_message = 'Unable to create photo upload directory.';
                     } else {
@@ -75,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $error_message = 'Could not submit your report. Please try again.';
                 $stmt->close();
-                if ($file_path !== null && is_file(__DIR__ . '/' . $file_path)) {
-                    unlink(__DIR__ . '/' . $file_path);
+                if ($file_path !== null && is_file(dirname(__DIR__) . '/' . $file_path)) {
+                    unlink(dirname(__DIR__) . '/' . $file_path);
                 }
             }
         }
@@ -91,7 +91,7 @@ unset($_SESSION['issue_success']);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Report an Issue | Kampung Sentosa</title>
-<link rel="icon" href="src/issue.png">
+<link rel="icon" href="../src/issue.png">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
@@ -100,7 +100,7 @@ unset($_SESSION['issue_success']);
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif}
 a{color:inherit;text-decoration:none}
-.hero{height:490px;position:relative;color:white;background:linear-gradient(rgba(10,16,20,.67),rgba(10,16,20,.70)),url('src/kampung.jpeg') center center/cover no-repeat}
+.hero{height:490px;position:relative;color:white;background:linear-gradient(rgba(10,16,20,.67),rgba(10,16,20,.70)),url('../src/kampung.jpeg') center center/cover no-repeat}
 .nav{max-width:1190px;margin:auto;padding:28px 24px;display:flex;justify-content:space-between;align-items:center;gap:20px;position:relative;z-index:2}
 .brand{font-size:22px;font-weight:700;white-space:nowrap}.brand span{color:#d9b687}
 .navlinks{display:flex;align-items:center;gap:25px;flex-wrap:wrap;font-size:13px}.navlinks a,.welcome{color:#eee}.navlinks a:hover,.navlinks .active{color:#d6b283}.navlinks .logout{color:#ff9990}
@@ -140,7 +140,7 @@ textarea.control{min-height:95px;resize:vertical;line-height:1.7}.hint{color:#96
       <a href="view_issues.php">View issue</a>
       <a href="edit_profile.php">Edit Profile</a>
       <span class="welcome">Welcome, <?php echo e($_SESSION['username']); ?></span>
-      <a class="logout" href="logout.php">Logout</a>
+      <a class="logout" href="../logout.php">Logout</a>
     </div>
   </nav>
   <div class="hero-content">

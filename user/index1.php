@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config.php';
 
 if (isset($_SESSION['username'])) {
     header('Location: about1.php');
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#292d30">
-    <link rel="icon" href="src/adminicon.png">
+    <link rel="icon" href="../src/adminicon.png">
     <title>Resident Login | Kampung Sentosa</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .topbar-back:hover { color:#d4b58c; }
         main { flex:1; display:flex; align-items:center; justify-content:center; padding:52px 20px; }
         .auth-shell { width:min(100%,980px); min-height:560px; display:grid; grid-template-columns:1fr 1fr; background:white; border-radius:18px; overflow:hidden; border:1px solid var(--border); box-shadow:0 24px 60px rgba(65,49,28,.12); }
-        .visual { position:relative; background:linear-gradient(rgba(18,23,25,.46),rgba(18,23,25,.72)),url('src/kampung.jpeg') center/cover no-repeat; display:flex; flex-direction:column; justify-content:flex-end; padding:45px; color:white; }
+        .visual { position:relative; background:linear-gradient(rgba(18,23,25,.46),rgba(18,23,25,.72)),url('../src/kampung.jpeg') center/cover no-repeat; display:flex; flex-direction:column; justify-content:flex-end; padding:45px; color:white; }
         .visual-script { font-family:'Great Vibes',cursive; color:#e1bd8e; font-size:54px; line-height:1.15; }
         .visual h2 { font-size:33px; line-height:1.3; margin:6px 0 13px; }
         .visual p { font-size:13px; line-height:1.9; color:#e6e2dc; max-width:350px; margin:0; }
@@ -110,8 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <header class="topbar">
-        <a class="brand" href="index.php">Issues <span>Tracker</span></a>
-        <a class="topbar-back" href="register1.php"><i class="fa-solid fa-arrow-left"></i> Back to Roles</a>
+        <a class="brand" href="../index.php">Issues <span>Tracker</span></a>
+        <a class="topbar-back" href="../register1.php"><i class="fa-solid fa-arrow-left"></i> Back to Roles</a>
     </header>
 
     <main>

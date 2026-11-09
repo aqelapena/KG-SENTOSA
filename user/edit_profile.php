@@ -1,7 +1,7 @@
 
 <?php
 session_start();
-include 'config.php';
+include '../config.php';
 
 if (!isset($_SESSION['username'])) {
     header("Location: index1.php");
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="src/editprof.png">
+<link rel="icon" href="../src/editprof.png">
 <title>Edit Profile | Kampung Sentosa</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">

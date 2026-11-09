@@ -1,7 +1,7 @@
 
 <?php
 session_start();
-include 'db.php';
+include '../db.php';
 
 function e($value) {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="src/view.png">
+<link rel="icon" href="../src/view.png">
 <title>Edit Issue | Kampung Sentosa</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">

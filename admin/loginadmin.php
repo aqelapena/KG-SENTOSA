@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="admin.css">
-    <link rel="icon" href="src/admin.png" />
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" href="../src/admin.png" />
     <title>Admin Login</title>
 </head>
 
@@ -43,13 +43,13 @@
                     <h1>Welcome Admin!</h1>
                     <p>Enter your personal details to use all site features</p>
                     <button class="hidden" id="login">Sign In</button>
-                    <button onclick="window.location.href='register1.php';" class="hidden" id="backhome">Back Home</button>
+                    <button onclick="window.location.href='../register1.php';" class="hidden" id="backhome">Back Home</button>
                 </div>
                 <div class="toggle-panel toggle-right">
                     <h1>Hello, Admin KampungSentosa!</h1>
                     <p>Register with your personal details to use all site features</p>
                     <button class="hidden" id="register">Sign Up</button><br>
-                    <button onclick="window.location.href='register1.php';" class="hidden" id="backhome">Back Home</button>
+                    <button onclick="window.location.href='../register1.php';" class="hidden" id="backhome">Back Home</button>
                 </div>
             </div>
         </div>
@@ -57,7 +57,7 @@
         
     </div>
 
-    <script src="adminscript.js"></script>
+    <script src="../js/adminscript.js"></script>
 </body>
 
 </html>

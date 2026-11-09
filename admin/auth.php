@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php'; // Include database connection
+include '../config.php'; // Include database connection
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action']) && $_POST['action'] === 'signup') {
